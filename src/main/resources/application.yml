@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8964
 
 spring:
   cq:
@@ -7,8 +7,6 @@ spring:
     # 如果前一个功能返回MESSAGE_BLOCK，下一个功能不会被执行
     # 如果前一个功能返回MESSAGE_IGNORE，会继续执行下一个功能
     plugin-list:
-      - com.example.demo.plugin.DemoPlugin
-      - com.example.demo.plugin.TestPlugin
       - com.example.demo.plugin.HelloPlugin
 
     # 下面配置event线程池，也可以删掉用默认的
