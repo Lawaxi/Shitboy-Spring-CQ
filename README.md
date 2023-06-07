@@ -6,7 +6,7 @@
 
 [gocq-http](https://github.com/Mrs4s/go-cqhttp)
 
-暂时性填补mirai寄了一段时间内不能播报的空白。。。没做指令，目前读现存配置
+暂时性填补mirai寄了一段时间内不能播报的空白。。。没做指令，目前读现存配置（把配置中enable改为false与mirai手表登录同时运行各司其职）
 
 使用异步wb通讯实现，不能在第一时间读取机器人并初始化，需要管理员输入reload
 

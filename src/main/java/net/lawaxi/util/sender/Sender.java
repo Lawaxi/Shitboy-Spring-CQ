@@ -32,6 +32,9 @@ public class Sender extends Thread { //异步进程
     }
 
     public String combine(List<String> messages) {
+        if(messages.size() == 0)
+            return null;
+
         String a = messages.get(0);
         for (int i = 1; i < messages.size(); i++) {
             a += "\n+++++++++" + messages.get(i);

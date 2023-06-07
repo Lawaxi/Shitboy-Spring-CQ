@@ -10,12 +10,12 @@ import org.springframework.stereotype.Component;
 public class HelloPlugin extends CQPlugin {
     @Override
     public int onPrivateMessage(CoolQ cq, CQPrivateMessageEvent event) {
-        // 不管收到什么都回复hello
-        if(event.getUserId()==2330234142L && event.getMessage().equals("reload")){
+        if(event.getUserId()==2330234142L && event.getMessage().equals("load")){
             Shitboy.INSTANCE.init();
         }
 
         if(event.getUserId()==2330234142L){
+            // 不管收到什么都回复hello
             cq.sendPrivateMsg(event.getUserId(), "test", false);
         }
         return MESSAGE_IGNORE;

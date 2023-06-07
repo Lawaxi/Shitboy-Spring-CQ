@@ -207,10 +207,7 @@ public final class Shitboy {
         }
 
         //------------------------------------------------
-        if (properties.enable) {
-            CronUtil.start();
-        } else {
-            //停止
-        }
+        CronUtil.start();
+        //持续开启，适配mirai插件
     }
 }
