@@ -1,5 +1,6 @@
 package net.lawaxi;
 
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.cron.CronUtil;
 import net.lawaxi.handler.*;
 import net.lawaxi.model.EndTime;
@@ -30,7 +31,7 @@ public final class Shitboy {
     public Shitboy() {
     }
 
-    public void init(){
+    public void init() {
         initProperties();
         loadConfig();
         listenBroadcast();
@@ -86,10 +87,18 @@ public final class Shitboy {
         //------------------------------------------------
 
         //口袋48登录
-        boolean pocket48_has_login = this.handlerPocket48.login(
-                properties.pocket48_account,
-                properties.pocket48_password
-        );
+        boolean pocket48_has_login = false;
+        if (!properties.pocket48_token.equals("")) {
+            this.handlerPocket48.login(properties.pocket48_token, false);
+            pocket48_has_login = true;
+        } else if (!(properties.pocket48_account.equals("") || properties.pocket48_password.equals(""))) {
+            pocket48_has_login = this.handlerPocket48.login(
+                    properties.pocket48_account,
+                    properties.pocket48_password
+            );
+        } else {
+            getLogger().info("开启口袋48播报需填写config/net.lawaxi.shitboy/config.setting并重启");
+        }
 
         boolean weibo_has_login = false;
         try {
@@ -113,6 +122,8 @@ public final class Shitboy {
 
         //服务
         for (CoolQ b : CQGlobal.robots.values()) {
+            long[] groups = b.getGroupList().getData().stream().mapToLong((a) -> a.getGroupId()).toArray();
+
             if (pocket48_has_login) {
                 handlerPocket48.setCronScheduleID(CronUtil.schedule(properties.pocket48_pattern, new Runnable() {
                             @Override
@@ -120,7 +131,7 @@ public final class Shitboy {
                                 HashMap<Long, Pocket48SenderCache> cache = new HashMap();
 
                                 for (long group : properties.pocket48_subscribe.keySet()) {
-                                    if (b.getGroupInfo(group, true) == null)
+                                    if (!ArrayUtil.contains(groups, group))
                                         continue;
 
                                     if (!pocket48RoomEndTime.containsKey(group))//放到Runnable里面是因为可能实时更新新的群
@@ -142,7 +153,7 @@ public final class Shitboy {
                         @Override
                         public void run() {
                             for (long group : properties.bilibili_subscribe.keySet()) {
-                                if (b.getGroupInfo(group, true) == null)
+                                if (!ArrayUtil.contains(groups, group))
                                     continue;
 
                                 if (!bilibiliLiveStatus.containsKey(group))
@@ -159,7 +170,7 @@ public final class Shitboy {
                             @Override
                             public void run() {
                                 for (long group : properties.weibo_user_subscribe.keySet()) {
-                                    if (b.getGroupInfo(group, true) == null)
+                                    if (!ArrayUtil.contains(groups, group))
                                         continue;
 
                                     if (!weiboEndTime.containsKey(group))
@@ -178,7 +189,7 @@ public final class Shitboy {
                         public void run() {
                             getLogger().info("10");
                             for (long group : properties.weidian_cookie.keySet()) {
-                                if (b.getGroupInfo(group, true) == null)
+                                if (!ArrayUtil.contains(groups, group))
                                     continue;
 
                                 if (!weidianEndTime.containsKey(group))
@@ -196,7 +207,7 @@ public final class Shitboy {
                         public void run() {
                             getLogger().info("5");
                             for (long group : properties.weidian_cookie.keySet()) {
-                                if (b.getGroupInfo(group, true) == null)
+                                if (!ArrayUtil.contains(groups, group))
                                     continue;
 
                                 new WeidianSender(b, group, handlerWeidianSender).start();

@@ -43,8 +43,9 @@ public class ConfigOperator {
             setting.setByGroup("schedule_item", "weidian", "*/10 * * * *");
 
             //口袋48
-            setting.setByGroup("account", "pocket48", "填写口袋48登录手机号");
-            setting.setByGroup("password", "pocket48", "填写口袋48登陆密码");
+            setting.setByGroup("account", "pocket48", "");
+            setting.setByGroup("password", "pocket48", "");
+            setting.setByGroup("token", "pocket48", "");
 
             object = new JSONObject();
             object.set("qqGroup", 1234567);
@@ -116,9 +117,9 @@ public class ConfigOperator {
         properties.weidian_pattern_item = setting.getStr("schedule_item", "weidian", "*/10 * * * *");
 
         //口袋48
-        properties.pocket48_account = setting.getByGroup("account", "pocket48");
-        properties.pocket48_password = setting.getByGroup("password", "pocket48");
-
+        properties.pocket48_account = setting.getStr("account", "pocket48", "");
+        properties.pocket48_password = setting.getStr("password", "pocket48", "");
+        properties.pocket48_token = setting.getStr("token", "pocket48", "");
         for (Object a :
                 JSONUtil.parseArray(setting.getByGroup("subscribe", "pocket48")).toArray()) {
             JSONObject sub = JSONUtil.parseObj(a);
@@ -180,259 +181,10 @@ public class ConfigOperator {
         }
     }
 
-    //修改配置并更新缓存的方法
-    public void swch(boolean on) {
-        setting.set("enable", String.valueOf(on));
+    public boolean setAndSaveToken(String token) {
+        properties.pocket48_token = token;
+        setting.setByGroup("token", "pocket48", token);
         setting.store();
-        properties.enable = setting.getBool("enable");
-    }
-
-    public boolean setWelcome(String welcome, long group) {
-        properties.welcome.put(group, welcome);
-        saveWelcome();
         return true;
     }
-
-    public boolean closeWelcome(long group) {
-        properties.welcome.remove(group);
-        saveWelcome();
-        return true;
-    }
-
-    public boolean addPocket48RoomSubscribe(long room_id, long group) {
-        if (!properties.pocket48_subscribe.containsKey(group)) {
-            properties.pocket48_subscribe.put(group, new Pocket48Subscribe(
-                    true, new ArrayList<>(), new ArrayList<>()
-            ));
-        }
-
-        if (properties.pocket48_subscribe.get(group).getRoomIDs().contains(room_id))
-            return false;
-
-        properties.pocket48_subscribe.get(group).getRoomIDs().add(room_id);
-        savePocket48SubscribeConfig();
-        return true;
-    }
-
-    public boolean rmPocket48RoomSubscribe(long room_id, long group) {
-        if (!properties.pocket48_subscribe.get(group).getRoomIDs().contains(room_id))
-            return false;
-
-        properties.pocket48_subscribe.get(group).getRoomIDs().remove(room_id);
-        savePocket48SubscribeConfig();
-        return true;
-    }
-
-    public boolean addRoomIDConnection(long room_id, long sever_id) {
-        if (properties.pocket48_serverID.containsKey(room_id))
-            return false;
-
-        properties.pocket48_serverID.put(room_id, sever_id);
-        savePocket48RoomIDConnectConfig();
-        return true;
-    }
-
-    public boolean rmRoomIDConnection(long room_id, long sever_id) {
-        if (!properties.pocket48_serverID.containsKey(room_id))
-            return false;
-
-        properties.pocket48_serverID.remove(room_id, sever_id);
-        savePocket48RoomIDConnectConfig();
-        return true;
-    }
-
-    public boolean addBilibiliLiveSubscribe(int room_id, long group) {
-        if (!properties.bilibili_subscribe.containsKey(group)) {
-            properties.bilibili_subscribe.put(group, new ArrayList<>());
-        }
-
-        if (properties.bilibili_subscribe.get(group).contains(room_id))
-            return false;
-
-        properties.bilibili_subscribe.get(group).add(room_id);
-        saveBilibiliConfig();
-        return true;
-    }
-
-    public boolean rmBilibiliLiveSubscribe(int room_id, long group) {
-        if (!properties.bilibili_subscribe.get(group).contains(room_id))
-            return false;
-
-        properties.bilibili_subscribe.get(group).remove((Object) room_id);
-        saveBilibiliConfig();
-        return true;
-    }
-
-
-    public boolean addWeiboUserSubscribe(long id, long group) {
-        if (!properties.weibo_user_subscribe.containsKey(group)) {
-            properties.weibo_user_subscribe.put(group, new ArrayList<>());
-            properties.weibo_superTopic_subscribe.put(group, new ArrayList<>());
-        }
-
-        if (properties.weibo_user_subscribe.get(group).contains(id))
-            return false;
-
-        properties.weibo_user_subscribe.get(group).add(id);
-        saveWeiboConfig();
-        return true;
-    }
-
-    public boolean rmWeiboUserSubscribe(long id, long group) {
-        if (!properties.weibo_user_subscribe.get(group).contains(id))
-            return false;
-
-        properties.weibo_user_subscribe.get(group).remove(id);
-        saveWeiboConfig();
-        return true;
-    }
-
-    public boolean addWeiboSTopicSubscribe(String id, long group) {
-        if (!properties.weibo_user_subscribe.containsKey(group)) {
-            properties.weibo_user_subscribe.put(group, new ArrayList<>());
-            properties.weibo_superTopic_subscribe.put(group, new ArrayList<>());
-        }
-
-        if (properties.weibo_superTopic_subscribe.get(group).contains(id))
-            return false;
-
-        properties.weibo_superTopic_subscribe.get(group).add(id);
-        saveWeiboConfig();
-        return true;
-    }
-
-    public boolean rmWeiboSTopicSubscribe(String id, long group) {
-        if (!properties.weibo_superTopic_subscribe.get(group).contains(id))
-            return false;
-
-        properties.weibo_superTopic_subscribe.get(group).remove(id);
-        saveWeiboConfig();
-        return true;
-    }
-
-    public boolean setWeidianCookie(String cookie, long group) {
-        boolean autoDeliver = false;
-        List<Long> highlightItem = new ArrayList<>();
-        if (properties.weidian_cookie.containsKey(group)) {
-            autoDeliver = properties.weidian_cookie.get(group).autoDeliver;
-            highlightItem = properties.weidian_cookie.get(group).highlightItem;
-        }
-        properties.weidian_cookie.put(group, WeidianCookie.construct(cookie, autoDeliver, highlightItem));
-        saveWeidianConfig();
-        return true;
-    }
-
-    public int switchWeidianAutoDeliver(long group) {
-        if (!properties.weidian_cookie.containsKey(group))
-            return -1;
-
-        WeidianCookie cookie = properties.weidian_cookie.get(group);
-        cookie.autoDeliver = !cookie.autoDeliver;
-        saveWeidianConfig();
-        return cookie.autoDeliver ? 1 : 0;
-    }
-
-    public boolean rmWeidianCookie(long group) {
-        if (!properties.weidian_cookie.containsKey(group)) {
-            return false;
-        }
-
-        properties.weidian_cookie.remove(group);
-        saveWeidianConfig();
-        return true;
-    }
-
-    public int highlightWeidianItem(long group, long itemid) {
-        if (!properties.weidian_cookie.containsKey(group)) {
-            return -1;
-        }
-
-        List<Long> it = properties.weidian_cookie.get(group).highlightItem;
-        if (it.contains(itemid)) {
-            it.remove(itemid);
-        } else {
-            it.add(itemid);
-        }
-        saveWeidianConfig();
-        return it.contains(itemid) ? 1 : 0;
-    }
-
-    public void saveWelcome() {
-        String a = "[";
-        for (long group : properties.welcome.keySet()) {
-            JSONObject object = new JSONObject();
-            object.set("1", group);
-            object.set("2", properties.welcome.get(group));
-            a += object + ",";
-        }
-        setting.set("welcome", (a.length() > 1 ? a.substring(0, a.length() - 1) : a) + "]");
-        setting.store();
-    }
-
-    public void savePocket48SubscribeConfig() {
-        String a = "[";
-        for (long group : properties.pocket48_subscribe.keySet()) {
-            JSONObject object = new JSONObject();
-            Pocket48Subscribe subscribe = properties.pocket48_subscribe.get(group);
-            object.set("qqGroup", group);
-            object.set("showAtOne", subscribe.showAtOne());
-            object.set("starSubs", subscribe.getStarIDs().toArray());
-            object.set("roomSubs", subscribe.getRoomIDs().toArray());
-            a += object + ",";
-        }
-        setting.setByGroup("subscribe", "pocket48", (a.length() > 1 ? a.substring(0, a.length() - 1) : a) + "]");
-        setting.store();
-    }
-
-    public void savePocket48RoomIDConnectConfig() {
-        String a = "[";
-        for (long room_id : properties.pocket48_serverID.keySet()) {
-            JSONObject object = new JSONObject();
-            object.set("roomID", room_id);
-            object.set("serverID", properties.pocket48_serverID.get(room_id));
-            a += object + ",";
-        }
-        setting.setByGroup("roomConnection", "pocket48", (a.length() > 1 ? a.substring(0, a.length() - 1) : a) + "]");
-        setting.store();
-    }
-
-    public void saveBilibiliConfig() {
-        String a = "[";
-        for (long group : properties.bilibili_subscribe.keySet()) {
-            JSONObject object = new JSONObject();
-            object.set("qqGroup", group);
-            object.set("subscribe", properties.bilibili_subscribe.get(group));
-            a += object + ",";
-        }
-        setting.setByGroup("subscribe", "bilibili", (a.length() > 1 ? a.substring(0, a.length() - 1) : a) + "]");
-        setting.store();
-    }
-
-    public void saveWeiboConfig() {
-        String a = "[";
-        for (long group : properties.weibo_user_subscribe.keySet()) {
-            JSONObject object = new JSONObject();
-            object.set("qqGroup", group);
-            object.set("userSubs", properties.weibo_user_subscribe.get(group));
-            object.set("superTopicSubs", properties.weibo_superTopic_subscribe.get(group));
-            a += object + ",";
-        }
-        setting.setByGroup("subscribe", "weibo", (a.length() > 1 ? a.substring(0, a.length() - 1) : a) + "]");
-        setting.store();
-    }
-
-    public void saveWeidianConfig() {
-        String a = "[";
-        for (long group : properties.weidian_cookie.keySet()) {
-            JSONObject object = new JSONObject();
-            object.set("qqGroup", group);
-            object.set("cookie", properties.weidian_cookie.get(group).cookie);
-            object.set("autoDeliver", properties.weidian_cookie.get(group).autoDeliver);
-            object.set("highlight", properties.weidian_cookie.get(group).highlightItem.toString());
-            a += object + ",";
-        }
-        setting.setByGroup("shops", "weidian", (a.length() > 1 ? a.substring(0, a.length() - 1) : a) + "]");
-        setting.store();
-    }
-
 }

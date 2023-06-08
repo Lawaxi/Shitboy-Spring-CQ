@@ -48,14 +48,19 @@ public class Pocket48Handler extends WebHandler {
         JSONObject object = JSONUtil.parseObj(s);
         if (object.getInt("status") == 200) {
             JSONObject content = JSONUtil.parseObj(object.getObj("content"));
-            header.setToken(content.getStr("token"));
-            logInfo("口袋48登陆成功");
+            login(content.getStr("token"), true);
             return true;
         } else {
-            logInfo("口袋48登陆失败");
-            logError(object.getStr("message"));
+            logInfo("口袋48登陆失败：" + object.getStr("message"));
             return false;
         }
+    }
+
+    public void login(String token, boolean save) {
+        header.setToken(token);
+        logInfo("口袋48登陆成功");
+        if (save)
+            Shitboy.INSTANCE.getConfig().setAndSaveToken(token);
     }
 
     public boolean isLogin() {
@@ -64,6 +69,20 @@ public class Pocket48Handler extends WebHandler {
 
     public void logout() {
         header.setToken(null);
+    }
+
+    @Override
+    protected void logError(String msg) {
+        if (msg.equals("非法授权")) {
+            if (properties.pocket48_account.equals("") || properties.pocket48_password.equals("")) {
+                logout();
+                super.logError("口袋48 token失效请重新填写，同时填写token和账密可在token时效时登录（优先使用token）");
+            } else {
+                login(properties.pocket48_account, properties.pocket48_password);
+            }
+        }
+
+        super.logError(msg);
     }
 
     @Override
