@@ -20,10 +20,15 @@ public class WeidianSenderHandler {
     }
 
     public String executeItemMessages(WeidianItem item, long group) {
-        WeidianHandler weidian = Shitboy.INSTANCE.getHandlerWeidian();
         WeidianCookie cookie = Shitboy.INSTANCE.getProperties().weidian_cookie.get(group);
         return getItemMessage(item, cookie, 5);
     }
+
+    public String executeItemMessages(WeidianItem item, long group, int pickAmount) {
+        WeidianCookie cookie = Shitboy.INSTANCE.getProperties().weidian_cookie.get(group);
+        return getItemMessage(item, cookie, pickAmount);
+    }
+
 
     private String pickBuyer(WeidianBuyer[] buyers, int amount) {
         if (amount <= 0)
@@ -50,20 +55,25 @@ public class WeidianSenderHandler {
         long id = item.id;
         double total = 0;
         WeidianBuyer[] buyers = weidian.getItemBuyer(cookie, id);
-        if (buyers == null || buyers.length == 0)
-            return null;
 
-        for (WeidianBuyer buyer : buyers) {
-            total += buyer.contribution;
-        }
-
-        //double精度修正
-        total = (double) Math.round(total * 100) / 100;
-
-        //发送信息
         String m = item.name + "\n";
         if (!item.pic.equals("")) {
             m += "[CQ:image,file=" + item.pic + "]\n";
+        }
+
+        //无人购买
+        if (buyers == null || buyers.length == 0)
+            return m +
+                    "人数：0\n进度：0" +
+                    "\n" + DateTime.now() +
+                    "\n---------" + pickBuyer(buyers, pickAmount);
+
+        //有人购买
+        //double精度修正
+        total = (double) Math.round(total * 100) / 100;
+
+        for (WeidianBuyer buyer : buyers) {
+            total += buyer.contribution;
         }
         return m +
                 "人数：" + buyers.length +

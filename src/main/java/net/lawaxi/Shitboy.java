@@ -79,7 +79,7 @@ public final class Shitboy {
     }
 
     private void loadConfig() {
-        configOperator.load(properties);
+        getConfig().load(properties);
     }
 
     public void listenBroadcast() {
@@ -215,6 +215,14 @@ public final class Shitboy {
                         }
                     }
             ));
+
+            CronUtil.schedule("*/10 * * * *", new Runnable() {
+                @Override
+                public void run() {
+                    getConfig().init();
+                    //读入mirai程序造成的config更新
+                }
+            });
         }
 
         //------------------------------------------------

@@ -6,11 +6,11 @@
 
 [gocq-http](https://github.com/Mrs4s/go-cqhttp)
 
-暂时性填补mirai寄了一段时间内不能播报的空白。。。没做指令，目前读现存配置（把配置中enable改为false与mirai手表登录同时运行各司其职）
+mirai无法发送群消息（code45造成只能手表登录）时暂时性填补用，配合gocq-http
 
-使用异步wb通讯实现，不能在第一时间读取机器人并初始化，需要管理员输入reload
+使用异步wb通讯实现，不能在第一时间读取机器人并初始化，需要管理员输入load
 
-- 修改
-  - 管理员HelloPlugin
+- 如果您遇到同样问题，需要使用本项目，需修改下列内容再编译以适配
+  - 管理员QQ号com.example.demo.plugin.ShitBoyPlugin
   - 端口application.yml
-  - 配置ConfigOperator
+  - 配置net.lawaxi.util.ConfigOperator

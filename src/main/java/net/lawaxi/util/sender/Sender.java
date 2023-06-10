@@ -37,7 +37,7 @@ public class Sender extends Thread { //异步进程
 
         String a = messages.get(0);
         for (int i = 1; i < messages.size(); i++) {
-            a += "\n+++++++++" + messages.get(i);
+            a += "\n+++++++++\n" + messages.get(i);
         }
         return a;
     }
