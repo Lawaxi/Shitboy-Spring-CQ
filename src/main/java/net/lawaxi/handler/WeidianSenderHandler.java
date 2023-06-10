@@ -65,8 +65,7 @@ public class WeidianSenderHandler {
         if (buyers == null || buyers.length == 0)
             return m +
                     "人数：0\n进度：0" +
-                    "\n" + DateTime.now() +
-                    "\n---------" + pickBuyer(buyers, pickAmount);
+                    "\n" + DateTime.now();
 
         //有人购买
         //double精度修正
